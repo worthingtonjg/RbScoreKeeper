@@ -1,0 +1,28 @@
+﻿@model FlicButtonBinding
+
+@{
+    ViewData["Title"] = "Individual Score Page";
+}
+
+<div class="text-center">
+    <h1 id="playerName" class="display-4"></h1>
+    <p id="playerScore" style="font-size:200px"></p>
+</div>
+
+<script src="~/lib/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/score.js"></script>
+
+<script>
+    var urlParams = new URLSearchParams(window.location.search);
+    var flicId = urlParams.get('flicId');
+
+    fetch('/api/score/' + flicId)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (json) {
+            console.log(json);
+            document.getElementById("playerName").innerHTML = json.playerName;
+            document.getElementById("playerScore").innerHTML = json.playerScore;
+        });
+</script>

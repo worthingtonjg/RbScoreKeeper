@@ -15,17 +15,7 @@ namespace RbScoreKeeper.Controllers
             return View();
         }
 
-        public IActionResult Jon()
-        {
-            return View();
-        }
-
-        public IActionResult Tony()
-        {
-            return View();
-        }
-
-        public IActionResult Alan()
+        public IActionResult MyScore()
         {
             return View();
         }

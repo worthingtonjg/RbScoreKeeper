@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using RbScoreKeeper.Hubs;
+using RbScoreKeeper.Models;
 
 namespace RbScoreKeeper.Controllers
 {
@@ -13,7 +14,7 @@ namespace RbScoreKeeper.Controllers
     [ApiController]
     public class ScoreController : Controller
     {
-        private static Dictionary<string, int> _scores;
+        private static Dictionary<string, FlicButtonBinding> _scores;
         private IHubContext<ScoreHub> _hubContext;
 
         public ScoreController(IHubContext<ScoreHub> hubContext)
@@ -26,53 +27,63 @@ namespace RbScoreKeeper.Controllers
         {
             if(_scores == null)
             {
-                _scores = new Dictionary<string, int>();
-                _scores["Jon"] = 0;
-                _scores["Tony"] = 0;
-                _scores["Alan"] = 0;
+                _scores = new Dictionary<string, FlicButtonBinding>();
+                _scores["001"] = new FlicButtonBinding("Alan", 0);
+                _scores["002"] = new FlicButtonBinding("Jon", 0);
+                _scores["003"] = new FlicButtonBinding("Tony", 0);
             }
 
-            return PartialView("Scores",_scores);
+            return PartialView("ScoresPartial",_scores);
         }
 
-        [HttpGet("{name}", Name = "Get")]
-        public int? Get(string name)
+        [HttpGet("{flicId}", Name = "Get")]
+        public FlicButtonBinding Get(string flicId)
         {
-            if (_scores.ContainsKey(name))
+            if (_scores.ContainsKey(flicId))
             {
-                return _scores[name];
+                return _scores[flicId];
             }
 
             return null;
         }
 
-        [HttpPut("{name}/increment")]
-        public async void IncrementScore(string name)
+        [HttpPut("{flicId}/assign")]
+        public async void AssignFlic(string flicId, [FromQuery]string name)
         {
-            if (_scores.ContainsKey(name))
+            if (_scores.ContainsKey(flicId))
             {
-                ++_scores[name];
-                await _hubContext.Clients.All.SendAsync("Refresh", name);
+                _scores[flicId].PlayerName = name;
+                await _hubContext.Clients.All.SendAsync("Refresh", flicId);
             }
         }
 
-        [HttpPut("{name}/decrement")]
-        public async void DecrementScore(string name)
+        [HttpPut("{flicId}/increment")]
+        public async void IncrementScore(string flicId)
         {
-            if (_scores.ContainsKey(name))
+            if (_scores.ContainsKey(flicId))
             {
-                --_scores[name];
-                await _hubContext.Clients.All.SendAsync("Refresh", name);
+                ++_scores[flicId].PlayerScore;
+                await _hubContext.Clients.All.SendAsync("Refresh", flicId);
             }
         }
 
-        [HttpDelete("{name}")]
-        public async void ResetScore(string name)
+        [HttpPut("{flicId}/decrement")]
+        public async void DecrementScore(string flicId)
         {
-            if (_scores.ContainsKey(name))
+            if (_scores.ContainsKey(flicId))
             {
-                _scores[name] = 0;
-                await _hubContext.Clients.All.SendAsync("Refresh", name);
+                --_scores[flicId].PlayerScore;
+                await _hubContext.Clients.All.SendAsync("Refresh", flicId);
+            }
+        }
+
+        [HttpDelete("{flicId}")]
+        public async void ResetScore(string flicId)
+        {
+            if (_scores.ContainsKey(flicId))
+            {
+                _scores[flicId].PlayerScore = 0;
+                await _hubContext.Clients.All.SendAsync("Refresh", flicId);
             }
         }
     }
