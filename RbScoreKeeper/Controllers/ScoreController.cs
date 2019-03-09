@@ -28,9 +28,9 @@ namespace RbScoreKeeper.Controllers
             if(_scores == null)
             {
                 _scores = new Dictionary<string, FlicButtonBinding>();
-                _scores["001"] = new FlicButtonBinding("Alan", 0);
-                _scores["002"] = new FlicButtonBinding("Jon", 0);
-                _scores["003"] = new FlicButtonBinding("Tony", 0);
+                _scores["001"] = new FlicButtonBinding("001", "Alan", 0);
+                _scores["002"] = new FlicButtonBinding("002", "Jon", 0);
+                _scores["003"] = new FlicButtonBinding("003", "Tony", 0);
             }
 
             return PartialView("ScoresPartial",_scores);

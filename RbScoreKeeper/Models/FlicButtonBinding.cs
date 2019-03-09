@@ -7,11 +7,14 @@ namespace RbScoreKeeper.Models
 {
     public class FlicButtonBinding
     {
-        public FlicButtonBinding(string playerName, int playerScore)
+        public FlicButtonBinding(string flicId, string playerName, int playerScore)
         {
+            FlicId = flicId;
             PlayerName = playerName;
             PlayerScore = playerScore;
         }
+
+        public string FlicId { get; set; }
 
         public string PlayerName { get; set; }
 
