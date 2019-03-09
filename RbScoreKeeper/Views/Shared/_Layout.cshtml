@@ -44,6 +44,7 @@
         </nav>
     </header>
     <div class="container">
+        <partial name="_CookieConsentPartial" />
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -52,6 +53,9 @@
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2019 - RbScoreKeeper
+            - <a asp-area="" asp-controller="Home" asp-action="Alan">Alan</a>
+            - <a asp-area="" asp-controller="Home" asp-action="Jon">Jon</a>
+            - <a asp-area="" asp-controller="Home" asp-action="Tony">Tony</a>
         </div>
     </footer>
 
