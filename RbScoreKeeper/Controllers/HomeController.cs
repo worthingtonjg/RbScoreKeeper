@@ -15,7 +15,17 @@ namespace RbScoreKeeper.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult Jon()
+        {
+            return View();
+        }
+
+        public IActionResult Tony()
+        {
+            return View();
+        }
+
+        public IActionResult Alan()
         {
             return View();
         }

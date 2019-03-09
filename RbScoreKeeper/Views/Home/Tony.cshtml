@@ -1,22 +1,23 @@
 ﻿@{
-    ViewData["Title"] = "All Scores";
+    ViewData["Title"] = "Tony's Score";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Scores</h1>
-    <div id="scoresTable"></div>
+    <h1 class="display-4">Tony</h1>
+
+    <p id="score" style="font-size:200px"></p>
 </div>
 
 <script src="~/lib/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/score.js"></script>
 
 <script>
-    fetch('/api/score')
+    fetch('/api/score/Tony')
         .then(function (response) {
             return response.text();
         })
         .then(function (data) {
             console.log(data);
-            document.getElementById("scoresTable").innerHTML = data;
+            document.getElementById("score").innerHTML = data;
         });
 </script>

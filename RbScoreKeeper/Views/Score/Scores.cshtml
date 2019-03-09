@@ -1,0 +1,10 @@
+﻿@model Dictionary<string, int>
+<table>
+    @foreach(var kvp in Model)
+    {
+        <tr>
+            <td>@kvp.Key</td>
+            <td>@kvp.Value</td>
+        </tr>
+    }
+</table>
