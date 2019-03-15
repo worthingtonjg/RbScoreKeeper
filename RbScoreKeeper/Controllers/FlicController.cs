@@ -14,5 +14,11 @@ namespace RbScoreKeeper.Controllers
         {
             return View();
         }
+
+        [HttpGet("/all")]
+        public ActionResult All()
+        {
+            return View();
+        }
     }
 }
