@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <Folder Include="Views\Flic\" />
-    <Folder Include="Views\Score\" />
   </ItemGroup>
 
 </Project>
