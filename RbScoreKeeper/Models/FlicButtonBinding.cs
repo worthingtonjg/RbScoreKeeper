@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace RbScoreKeeper.Models
 {
     public class FlicButtonBinding
     {
-        public FlicButtonBinding(string flicId, string playerName, int playerScore)
+        public FlicButtonBinding(Guid flicId, Guid playerId)
         {
+            BindingId = Guid.NewGuid();
+            PlayerId = playerId;
             FlicId = flicId;
-            PlayerName = playerName;
-            PlayerScore = playerScore;
         }
 
-        public string FlicId { get; set; }
+        public Guid BindingId { get; set; }
 
-        public string PlayerName { get; set; }
+        public Guid FlicId { get; set; }
 
-        public int PlayerScore { get; set; }
+        public Guid PlayerId { get; set; }
     }
 }

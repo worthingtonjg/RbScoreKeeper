@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RbScoreKeeper.Hubs;
+using RbScoreKeeper.Models;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace RbScoreKeeper
@@ -35,6 +36,8 @@ namespace RbScoreKeeper
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddSingleton<IAppState, AppState>();
 
             services.AddSignalR();
 
