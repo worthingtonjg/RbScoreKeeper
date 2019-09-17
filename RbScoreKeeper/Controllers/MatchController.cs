@@ -25,7 +25,13 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpGet()]
-        public IActionResult GetMatch()
+        public Match GetMatch()
+        {
+            return _appState.GetActiveMatch();
+        }
+
+        [HttpGet("partial")]
+        public IActionResult GetMatchPartial()
         {
             Match match = _appState.GetActiveMatch();
 

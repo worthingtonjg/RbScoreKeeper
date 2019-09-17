@@ -23,7 +23,7 @@
     });
 
     var refresh = function () {
-        fetch('/api/match')
+        fetch('/api/match/partial')
             .then(function (response) {
                 return response.text();
             })
