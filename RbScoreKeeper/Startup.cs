@@ -62,10 +62,11 @@ namespace RbScoreKeeper
                 app.UseHsts();
             }
 
+            app.UseCors();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-
+            
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ScoreHub>("/scoreHub");
