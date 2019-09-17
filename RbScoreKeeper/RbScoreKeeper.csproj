@@ -6,17 +6,19 @@
     <UserSecretsId>74bbbcc5-cbc4-4c84-8b1a-9995184f6576</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Views\Flic\**" />
+    <Content Remove="Views\Flic\**" />
+    <EmbeddedResource Remove="Views\Flic\**" />
+    <None Remove="Views\Flic\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="Views\Flic\" />
   </ItemGroup>
 
 </Project>

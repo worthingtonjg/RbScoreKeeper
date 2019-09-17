@@ -4,7 +4,6 @@
 
 <div class="text-center">
     <div id="scoresTable"></div>
-    <a href="/all">All</a>
 </div>
 
 <script src="~/lib/signalr/dist/browser/signalr.js"></script>
@@ -24,12 +23,13 @@
     });
 
     var refresh = function () {
-        fetch('/api/matches')
+        fetch('/api/match')
             .then(function (response) {
                 return response.text();
             })
             .then(function (data) {
                 console.log(data);
+                 document.getElementById("scoresTable").innerHTML = data;
             });
     }
 

@@ -39,15 +39,15 @@ namespace RbScoreKeeper.Models
 
         void CreateMatch(Guid groupId);
 
-        void EndMatch(Guid matchId);
+        void EndMatch();
 
         void NextGame(string buttonName);
 
-        void NextGame(Guid matchId);
+        void NextGame();
 
-        void RestartCurrentGame(Guid matchId);
+        void RestartCurrentGame();
 
-        void CancelMatch(Guid matchId);
+        void CancelMatch();
 
         void IncrementScore(string buttonName);
 
@@ -275,7 +275,7 @@ namespace RbScoreKeeper.Models
 
         #endregion
 
-        #region Matches
+        #region Match
         public Match GetActiveMatch()
         {
             return _activeMatch;
@@ -308,13 +308,13 @@ namespace RbScoreKeeper.Models
             _activeGame = _activeMatch.CurrentGame;
         }
 
-        public void CancelMatch(Guid matchId)
+        public void CancelMatch()
         {
             _activeMatch = null;
             _activeGame = null;
         }
 
-        public void EndMatch(Guid matchId)
+        public void EndMatch()
         {
             if (_activeMatch != null)
             {
@@ -326,7 +326,7 @@ namespace RbScoreKeeper.Models
             }
         }
 
-        public void RestartCurrentGame(Guid matchId)
+        public void RestartCurrentGame()
         {
             if (_activeMatch != null)
             {
@@ -334,7 +334,7 @@ namespace RbScoreKeeper.Models
             }
         }
 
-        public void NextGame(Guid matchId)
+        public void NextGame()
         {
             if (_activeMatch != null)
             {
@@ -355,7 +355,7 @@ namespace RbScoreKeeper.Models
             var players = _activeMatch.Players.Select(p => p.PlayerId).ToList();
             if (players.Contains(binding.PlayerId))
             {
-                NextGame(_activeMatch.MatchId);
+                NextGame();
             }
         }
 

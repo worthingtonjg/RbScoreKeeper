@@ -10,7 +10,7 @@ namespace RbScoreKeeper.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BindingsController : ControllerBase
+    public class BindingsController : Controller
     {
         private IAppState _appState;
 
