@@ -20,9 +20,9 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpGet()]
-        public List<Match> GetMatches()
+        public Match GetMatches()
         {
-            return _appState.GetActiveMatches();
+            return _appState.GetActiveMatch();
         }
 
         [HttpPost("create")]
@@ -55,5 +55,10 @@ namespace RbScoreKeeper.Controllers
             _appState.EndMatch(matchId);
         }
 
+        [HttpPost("{matchId}/history")]
+        public void History()
+        {
+            _appState.GetMatchHistory();
+        }
     }
 }

@@ -31,7 +31,11 @@ namespace RbScoreKeeper.Models
 
         bool DeleteGroup(Guid groupId);
 
-        List<Match> GetActiveMatches();
+        Match GetActiveMatch();
+
+        List<Match> GetMatchHistory();
+
+        List<Game> GetGameHistory();
 
         void CreateMatch(Guid groupId);
 
@@ -56,7 +60,8 @@ namespace RbScoreKeeper.Models
         private List<Player> _players { get; set; }
         private List<FlicButtonBinding> _bindings { get; set; }
         private List<Group> _groups { get; set; }
-        private List<Match> _activeMatches { get; set; }
+        private Match _activeMatch { get; set; }
+        private Game _activeGame { get; set; }
         private List<Match> _matchesHistory { get; set; }
         private List<Game> _gamesHistory { get; set; }
 
@@ -66,9 +71,10 @@ namespace RbScoreKeeper.Models
             _players = new List<Player>();
             _bindings = new List<FlicButtonBinding>();
             _groups = new List<Group>();
-            _activeMatches = new List<Match>();
             _matchesHistory = new List<Match>();
             _gamesHistory = new List<Game>();
+            _activeMatch = null;
+            _activeGame = null;
 
             AddDefaultData();
         }
@@ -229,13 +235,10 @@ namespace RbScoreKeeper.Models
                 var binding = _bindings.FirstOrDefault(b => b.FlicId == flic.FlicId);
                 if (binding != null)
                 {
-                    foreach (var match in _activeMatches)
+                    var players = _activeMatch.Players.Select(p => p.PlayerId).ToList();
+                    if (players.Contains(binding.PlayerId))
                     {
-                        var players = match.Players.Select(p => p.PlayerId).ToList();
-                        if (players.Contains(binding.PlayerId))
-                        {
-                            result = match.CurrentGame.Scores.FirstOrDefault(s => s.PlayerId == binding.PlayerId);
-                        }
+                        result = _activeMatch.CurrentGame.Scores.FirstOrDefault(s => s.PlayerId == binding.PlayerId);
                     }
                 }
             }
@@ -273,9 +276,9 @@ namespace RbScoreKeeper.Models
         #endregion
 
         #region Matches
-        public List<Match> GetActiveMatches()
+        public Match GetActiveMatch()
         {
-            return _activeMatches;
+            return _activeMatch;
         }
 
         public List<Match> GetMatchHistory()
@@ -294,57 +297,50 @@ namespace RbScoreKeeper.Models
 
             if (group == null) return;
 
-            var match = new Match
+            _activeMatch = new Match
             {
                 MatchId = Guid.NewGuid(),
                 StartTime = DateTime.Now,
                 Players = group.Players,
                 Games = new List<Game>() { new Game(group.Players) },
-
             };
 
-            _activeMatches.Add(match);
+            _activeGame = _activeMatch.CurrentGame;
         }
 
         public void CancelMatch(Guid matchId)
         {
-            var activeMatch = _activeMatches.FirstOrDefault(m => m.MatchId == matchId);
-            if (activeMatch != null)
-            {
-                _activeMatches.Remove(activeMatch);
-            }
+            _activeMatch = null;
+            _activeGame = null;
         }
 
         public void EndMatch(Guid matchId)
         {
-            var activeMatch = _activeMatches.FirstOrDefault(m => m.MatchId == matchId);
-            if (activeMatch != null)
+            if (_activeMatch != null)
             {
-                activeMatch.EndTime = DateTime.Now;
+                _activeMatch.EndTime = DateTime.Now;
 
-                _gamesHistory.Add(activeMatch.CurrentGame);
-                _matchesHistory.Add(activeMatch);
-                _activeMatches.Remove(activeMatch);
+                _gamesHistory.Add(_activeMatch.CurrentGame);
+                _matchesHistory.Add(_activeMatch);
+                _activeMatch = null;
             }
         }
 
         public void RestartCurrentGame(Guid matchId)
         {
-            var activeMatch = _activeMatches.FirstOrDefault(m => m.MatchId == matchId);
-            if (activeMatch != null)
+            if (_activeMatch != null)
             {
-                activeMatch.CurrentGame = new Game(activeMatch.Players);
+                _activeMatch.CurrentGame = new Game(_activeMatch.Players);
             }
         }
 
         public void NextGame(Guid matchId)
         {
-            var activeMatch = _activeMatches.FirstOrDefault(m => m.MatchId == matchId);
-            if (activeMatch != null)
+            if (_activeMatch != null)
             {
-                activeMatch.CurrentGame.EndTime = DateTime.Now;
-                _gamesHistory.Add(activeMatch.CurrentGame);
-                activeMatch.Games.Add(new Game(activeMatch.Players));
+                _activeMatch.CurrentGame.EndTime = DateTime.Now;
+                _gamesHistory.Add(_activeMatch.CurrentGame);
+                _activeMatch.Games.Add(new Game(_activeMatch.Players));
             }
         }
 
@@ -356,14 +352,10 @@ namespace RbScoreKeeper.Models
             var binding = _bindings.FirstOrDefault(b => b.FlicId == flic.FlicId);
             if (binding == null) return;
 
-            foreach (var match in _activeMatches)
+            var players = _activeMatch.Players.Select(p => p.PlayerId).ToList();
+            if (players.Contains(binding.PlayerId))
             {
-                var players = match.Players.Select(p => p.PlayerId).ToList();
-                if (players.Contains(binding.PlayerId))
-                {
-                    NextGame(match.MatchId);
-                    break;
-                }
+                NextGame(_activeMatch.MatchId);
             }
         }
 
