@@ -35,15 +35,6 @@ namespace RbScoreKeeper
             });
 
 
-            services.AddCors(options => {
-                options.AddPolicy("CorsPolicy", 
-                    builder => 
-                    builder
-                        .AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
-            });
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSingleton<IAppState, AppState>();
@@ -75,12 +66,18 @@ namespace RbScoreKeeper
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseCors("CorsPolicy");
+            app.UseCors(builder => builder
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .SetIsOriginAllowed((host) => true)
+                .AllowCredentials()
+              );
 
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ScoreHub>("/scoreHub");
             });
+            
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
