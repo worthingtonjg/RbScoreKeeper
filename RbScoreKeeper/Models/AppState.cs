@@ -195,13 +195,19 @@ namespace RbScoreKeeper.Models
         public void IncrementScore(string buttonName)
         {
             var score = GetPlayerScoreFromBinding(buttonName);
-            ++score.Score;
+            if (score != null)
+            {
+                ++score.Score;
+            }
         }
 
         public void DecrementScore(string buttonName)
         {
             var score = GetPlayerScoreFromBinding(buttonName);
-            --score.Score;
+            if (score != null)
+            {
+                --score.Score;
+            }
         }
 
         private PlayerScore GetPlayerScoreFromBinding(string buttonName)
