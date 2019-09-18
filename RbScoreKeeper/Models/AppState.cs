@@ -21,23 +21,13 @@ namespace RbScoreKeeper.Models
 
         List<FlicButtonBinding> GetButtonBindings();
 
-        void AddUpdateButtonBinding(Guid flicId, Guid playerId);
-
-        bool DeleteButtonBinding(Guid bindingId);
-
-        List<Group> GetGroups();
-
-        void AddGroup(List<Player> players);
-
-        bool DeleteGroup(Guid groupId);
-
         Match GetActiveMatch();
 
         List<Match> GetMatchHistory();
 
         List<Game> GetGameHistory();
 
-        void CreateMatch(Guid groupId);
+        void CreateMatch(List<Guid> playerIds);
 
         void EndMatch();
 
@@ -59,7 +49,6 @@ namespace RbScoreKeeper.Models
         private List<Flic> _flics { get; set; }
         private List<Player> _players { get; set; }
         private List<FlicButtonBinding> _bindings { get; set; }
-        private List<Group> _groups { get; set; }
         private Match _activeMatch { get; set; }
         private Game _activeGame { get; set; }
         private List<Match> _matchesHistory { get; set; }
@@ -70,7 +59,6 @@ namespace RbScoreKeeper.Models
             _flics = new List<Flic>();
             _players = new List<Player>();
             _bindings = new List<FlicButtonBinding>();
-            _groups = new List<Group>();
             _matchesHistory = new List<Match>();
             _gamesHistory = new List<Game>();
             _activeMatch = null;
@@ -100,15 +88,6 @@ namespace RbScoreKeeper.Models
             _players.Add(new Player("Scott"));
             _players.Add(new Player("Randy"));
             _players.Add(new Player("Nahinu"));
-
-            AddUpdateButtonBinding(flic1.FlicId, jon.PlayerId);
-            AddUpdateButtonBinding(flic2.FlicId, alan.PlayerId);
-            AddUpdateButtonBinding(flic3.FlicId, tony.PlayerId);
-
-            var defaultGroup = new Group(new List<Player>() { jon, alan, tony });
-            _groups.Add(defaultGroup);
-
-            CreateMatch(defaultGroup.GroupId);
         }
 
         #region Flics
@@ -248,33 +227,6 @@ namespace RbScoreKeeper.Models
 
         #endregion
 
-        #region Groups
-        public List<Group> GetGroups()
-        {
-            return _groups;
-        }
-
-        public void AddGroup(List<Player> players)
-        {
-            var group = new Group(players);
-
-            _groups.Add(group);
-        }
-
-        public bool DeleteGroup(Guid groupId)
-        {
-            var remove = _groups.FirstOrDefault(f => f.GroupId == groupId);
-            if (remove != null)
-            {
-                _groups.Remove(remove);
-                return true;
-            }
-
-            return false;
-        }
-
-        #endregion
-
         #region Match
         public Match GetActiveMatch()
         {
@@ -291,18 +243,26 @@ namespace RbScoreKeeper.Models
             return _gamesHistory;
         }
 
-        public void CreateMatch(Guid groupId)
+        public void CreateMatch(List<Guid> playerIds)
         {
-            var group = _groups.FirstOrDefault(g => g.GroupId == groupId);
+            var players = _players.Where(p => playerIds.Contains(p.PlayerId)).ToList();
 
-            if (group == null) return;
+            // Loop through the players and bind them to a flic
+            int index = 0;
+            foreach(var player in players)
+            {
+                if(index < _flics.Count)
+                {
+                    AddUpdateButtonBinding(_flics[index++].FlicId, player.PlayerId);
+                }
+            }
 
             _activeMatch = new Match
             {
                 MatchId = Guid.NewGuid(),
                 StartTime = DateTime.Now,
-                Players = group.Players,
-                Games = new List<Game>() { new Game(group.Players) },
+                Players = players,
+                Games = new List<Game>() { new Game(players) },
             };
 
             _activeGame = _activeMatch.CurrentGame;
@@ -328,9 +288,12 @@ namespace RbScoreKeeper.Models
 
         public void RestartCurrentGame()
         {
-            if (_activeMatch != null)
+            if (_activeMatch != null && _activeMatch.CurrentGame != null)
             {
-                _activeMatch.CurrentGame = new Game(_activeMatch.Players);
+                foreach(var score in _activeMatch.CurrentGame.Scores)
+                {
+                    score.Score = 0;
+                }
             }
         }
 
