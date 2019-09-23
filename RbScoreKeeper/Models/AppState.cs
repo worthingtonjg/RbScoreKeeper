@@ -10,13 +10,13 @@ namespace RbScoreKeeper.Models
     {
         Task<List<Player>> GetPlayersAsync();
 
-        void AddPlayer(string name);
+        Task AddPlayerAsync(string name);
 
         bool DeletePlayer(Guid playerId);
 
         Task<List<Flic>> GetFlicsAsync();
 
-        void AddFlic(string Name);
+        Task AddFlicAsync(string Name);
 
         bool DeleteFlic(Guid flicId);
 
@@ -79,17 +79,18 @@ namespace RbScoreKeeper.Models
         #region Flics
         public async Task<List<Flic>> GetFlicsAsync()
         {
-            var flics = await _storageHelper.GetFlics();
+            var flics = await _storageHelper.GetFlicsAsync();
 
             _flics = flics.Select(f => new Flic(f)).ToList();
 
             return _flics;
         }
 
-        public void AddFlic(string name)
+        public async Task AddFlicAsync(string name)
         {
-            var flic = new Flic(name);
-            _flics.Add(flic);
+            var entity = await _storageHelper.AddFlicAsync(name);
+
+            await GetFlicsAsync();
         }
 
         public bool DeleteFlic(Guid flicId)
@@ -116,17 +117,17 @@ namespace RbScoreKeeper.Models
         #region Players
         public async Task<List<Player>> GetPlayersAsync()
         {
-            var players = await _storageHelper.GetPlayers();
+            var players = await _storageHelper.GetPlayersAsync();
 
             _players = players.Select(p => new Player(p)).ToList();
 
             return _players;
         }
 
-        public void AddPlayer(string name)
+        public async Task AddPlayerAsync(string name)
         {
-            var player = new Player(name);
-            _players.Add(player);
+            var entity = _storageHelper.AddPlayerAsync(name);
+            await GetPlayersAsync();
         }
 
         public bool DeletePlayer(Guid playerId)

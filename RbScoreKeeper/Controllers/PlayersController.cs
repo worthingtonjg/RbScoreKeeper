@@ -24,9 +24,9 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpPost()]
-        public void AddPlayer([FromQuery]string name)
+        public async Task AddPlayer([FromQuery]string name)
         {
-            _appState.AddPlayer(name);
+            await _appState.AddPlayerAsync(name);
         }
 
         [HttpDelete("{playerId}")]

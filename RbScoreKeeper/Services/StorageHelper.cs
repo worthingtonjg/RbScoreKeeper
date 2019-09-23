@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using RbScoreKeeper.Entities;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,12 +9,16 @@ namespace RbScoreKeeper.Services
 {
     public interface IStorageHelper
     {
-        Task<List<PlayerEntity>> GetPlayers();
-        Task<List<FlicEntity>> GetFlics();
+        Task<List<PlayerEntity>> GetPlayersAsync();
+        Task<PlayerEntity> AddPlayerAsync(string name);
+        Task<List<FlicEntity>> GetFlicsAsync();
+        Task<FlicEntity> AddFlicAsync(string name);
     }
 
     public class StorageHelper : IStorageHelper
     {
+        private string partitionKey = "worthingtonjg";
+
         CloudStorageAccount storageAccount;
         CloudTableClient tableClient;
         CloudTable playerTable;
@@ -31,7 +36,7 @@ namespace RbScoreKeeper.Services
             flicTable = tableClient.GetTableReference("Flic");
         }
 
-        public async Task<List<PlayerEntity>> GetPlayers()
+        public async Task<List<PlayerEntity>> GetPlayersAsync()
         {
             var result = new List<PlayerEntity>();
 
@@ -52,7 +57,20 @@ namespace RbScoreKeeper.Services
             return result;
         }
 
-        public async Task<List<FlicEntity>> GetFlics()
+        public async Task<PlayerEntity> AddPlayerAsync(string name)
+        {
+            PlayerEntity player = new PlayerEntity();
+            player.PartitionKey = partitionKey;
+            player.RowKey = Guid.NewGuid().ToString();
+            player.Name = name;
+
+            TableOperation insert = TableOperation.Insert(player);
+            await playerTable.ExecuteAsync(insert);
+
+            return player;
+        }
+
+        public async Task<List<FlicEntity>> GetFlicsAsync()
         {
             var result = new List<FlicEntity>();
 
@@ -71,6 +89,19 @@ namespace RbScoreKeeper.Services
             } while (token != null);
 
             return result;
+        }
+
+        public async Task<FlicEntity> AddFlicAsync(string name)
+        {
+            FlicEntity flic = new FlicEntity();
+            flic.PartitionKey = partitionKey;
+            flic.RowKey = Guid.NewGuid().ToString();
+            flic.Name = name;
+
+            TableOperation insert = TableOperation.Insert(flic);
+            await flicTable.ExecuteAsync(insert);
+
+            return flic;
         }
     }
 }

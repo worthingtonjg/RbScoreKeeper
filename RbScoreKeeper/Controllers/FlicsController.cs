@@ -26,9 +26,9 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpPost()]
-        public void AddFlic([FromQuery]string name)
+        public async Task AddFlic([FromQuery]string name)
         {
-            _appState.AddFlic(name);
+            await _appState.AddFlicAsync(name);
         }
 
         [HttpDelete("{flicId}")]
