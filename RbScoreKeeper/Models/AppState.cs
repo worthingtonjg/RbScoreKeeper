@@ -53,6 +53,9 @@ namespace RbScoreKeeper.Models
         private List<FlicButtonBinding> _bindings { get; set; }
         private Match _activeMatch { get; set; }
         private Game _activeGame { get; set; }
+
+        private int _winningScore { get; set; } = 15;
+
         private List<Match> _matchesHistory { get; set; }
         private List<Game> _gamesHistory { get; set; }
 
@@ -286,7 +289,11 @@ namespace RbScoreKeeper.Models
             {
                 _activeMatch.EndTime = DateTime.Now;
 
-                _gamesHistory.Add(_activeMatch.CurrentGame);
+                if (_activeMatch.CurrentGame.Scores.Count(s => s.Score == _winningScore) == 1)
+                {
+                    _gamesHistory.Add(_activeMatch.CurrentGame);
+                }
+
                 _matchesHistory.Add(_activeMatch);
                 _activeMatch = null;
             }
@@ -307,9 +314,12 @@ namespace RbScoreKeeper.Models
         {
             if (_activeMatch != null)
             {
-                _activeMatch.CurrentGame.EndTime = DateTime.Now;
-                _gamesHistory.Add(_activeMatch.CurrentGame);
-                _activeMatch.Games.Add(new Game(_activeMatch.Players));
+                if (_activeMatch.CurrentGame.Scores.Count(s => s.Score == _winningScore) == 1)
+                {
+                    _activeMatch.CurrentGame.EndTime = DateTime.Now;
+                    _gamesHistory.Add(_activeMatch.CurrentGame);
+                    _activeMatch.Games.Add(new Game(_activeMatch.Players));
+                }
             }
         }
 
