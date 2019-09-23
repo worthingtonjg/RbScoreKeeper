@@ -2,6 +2,7 @@
 using RbScoreKeeper.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RbScoreKeeper.Controllers
 {
@@ -17,9 +18,9 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpGet()]
-        public List<Player> GetPlayers()
+        public async Task<List<Player>> GetPlayers()
         {
-            return _appState.GetPlayers();
+            return await _appState.GetPlayersAsync();
         }
 
         [HttpPost()]

@@ -8,13 +8,13 @@ namespace RbScoreKeeper.Models
 {
     public interface IAppState
     {
-        List<Player> GetPlayers();
+        Task<List<Player>> GetPlayersAsync();
 
         void AddPlayer(string name);
 
         bool DeletePlayer(Guid playerId);
 
-        List<Flic> GetFlics();
+        Task<List<Flic>> GetFlicsAsync();
 
         void AddFlic(string Name);
 
@@ -72,24 +72,17 @@ namespace RbScoreKeeper.Models
 
         private async void AddDefaultData()
         {
-            var flic1 = new Flic("001");
-            var flic2 = new Flic("002");
-            var flic3 = new Flic("003");
-
-            _flics.Add(flic1);
-            _flics.Add(flic2);
-            _flics.Add(flic3);
-
-            var flics = await _storageHelper.GetFlics();
-            _flics = flics.Select(f => new Flic(f)).ToList();
-
-            var players = await _storageHelper.GetPlayers();
-            _players = players.Select(p => new Player(p)).ToList();
+            await GetFlicsAsync();
+            await GetPlayersAsync();
         }
 
         #region Flics
-        public List<Flic> GetFlics()
+        public async Task<List<Flic>> GetFlicsAsync()
         {
+            var flics = await _storageHelper.GetFlics();
+
+            _flics = flics.Select(f => new Flic(f)).ToList();
+
             return _flics;
         }
 
@@ -121,8 +114,12 @@ namespace RbScoreKeeper.Models
         #endregion
 
         #region Players
-        public List<Player> GetPlayers()
+        public async Task<List<Player>> GetPlayersAsync()
         {
+            var players = await _storageHelper.GetPlayers();
+
+            _players = players.Select(p => new Player(p)).ToList();
+
             return _players;
         }
 

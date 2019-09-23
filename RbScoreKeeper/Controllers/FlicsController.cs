@@ -20,9 +20,9 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpGet()]
-        public List<Flic> GetFlics()
+        public async Task<List<Flic>> GetFlics()
         {
-            return _appState.GetFlics();
+            return await _appState.GetFlicsAsync();
         }
 
         [HttpPost()]
