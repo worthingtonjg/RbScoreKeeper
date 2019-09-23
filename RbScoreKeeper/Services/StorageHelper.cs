@@ -3,6 +3,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using RbScoreKeeper.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace RbScoreKeeper.Services
@@ -11,8 +12,10 @@ namespace RbScoreKeeper.Services
     {
         Task<List<PlayerEntity>> GetPlayersAsync();
         Task<PlayerEntity> AddPlayerAsync(string name);
+        Task<bool> DeletePlayerAsync(Guid playerId);
         Task<List<FlicEntity>> GetFlicsAsync();
         Task<FlicEntity> AddFlicAsync(string name);
+        Task<bool> DeleteFlicAsync(Guid flicId);
     }
 
     public class StorageHelper : IStorageHelper
@@ -70,6 +73,23 @@ namespace RbScoreKeeper.Services
             return player;
         }
 
+        public async Task<bool> DeletePlayerAsync(Guid playerId)
+        {
+            TableOperation retrieve = TableOperation.Retrieve<PlayerEntity>(partitionKey, playerId.ToString());
+            TableResult retrieved = await playerTable.ExecuteAsync(retrieve);
+            PlayerEntity deleteEntity = (PlayerEntity)retrieved.Result;
+
+            if (deleteEntity == null)
+            {
+                return false;
+            }
+
+            TableOperation delete = TableOperation.Delete(deleteEntity);
+            await playerTable.ExecuteAsync(delete);
+
+            return true;
+        }
+
         public async Task<List<FlicEntity>> GetFlicsAsync()
         {
             var result = new List<FlicEntity>();
@@ -88,7 +108,7 @@ namespace RbScoreKeeper.Services
 
             } while (token != null);
 
-            return result;
+            return result.OrderBy(f => f.Name).ToList();
         }
 
         public async Task<FlicEntity> AddFlicAsync(string name)
@@ -102,6 +122,23 @@ namespace RbScoreKeeper.Services
             await flicTable.ExecuteAsync(insert);
 
             return flic;
+        }
+
+        public async Task<bool> DeleteFlicAsync(Guid flicId)
+        {
+            TableOperation retrieve = TableOperation.Retrieve<FlicEntity>(partitionKey, flicId.ToString());
+            TableResult retrieved = await flicTable.ExecuteAsync(retrieve);
+            FlicEntity deleteEntity = (FlicEntity)retrieved.Result;
+
+            if(deleteEntity == null)
+            {
+                return false;
+            }
+
+            TableOperation delete = TableOperation.Delete(deleteEntity);
+            await flicTable.ExecuteAsync(delete);
+
+            return true;
         }
     }
 }

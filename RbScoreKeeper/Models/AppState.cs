@@ -12,13 +12,13 @@ namespace RbScoreKeeper.Models
 
         Task AddPlayerAsync(string name);
 
-        bool DeletePlayer(Guid playerId);
+        Task<bool> DeletePlayerAsync(Guid playerId);
 
         Task<List<Flic>> GetFlicsAsync();
 
         Task AddFlicAsync(string Name);
 
-        bool DeleteFlic(Guid flicId);
+        Task<bool> DeleteFlicAsync(Guid flicId);
 
         List<FlicButtonBinding> GetButtonBindings();
 
@@ -93,7 +93,7 @@ namespace RbScoreKeeper.Models
             await GetFlicsAsync();
         }
 
-        public bool DeleteFlic(Guid flicId)
+        public async Task<bool> DeleteFlicAsync(Guid flicId)
         {
             var remove = _flics.FirstOrDefault(f => f.FlicId == flicId);
             var binding = _bindings.FirstOrDefault(b => b.FlicId == flicId);
@@ -105,7 +105,9 @@ namespace RbScoreKeeper.Models
                     DeleteButtonBinding(binding.BindingId);
                 }
 
-                _flics.Remove(remove);
+                await _storageHelper.DeleteFlicAsync(flicId);
+                await GetFlicsAsync();
+
                 return true;
             }
 
@@ -130,12 +132,15 @@ namespace RbScoreKeeper.Models
             await GetPlayersAsync();
         }
 
-        public bool DeletePlayer(Guid playerId)
+        public async Task<bool> DeletePlayerAsync(Guid playerId)
         {
             var remove = _players.FirstOrDefault(f => f.PlayerId == playerId);
             if (remove != null)
             {
-                _players.Remove(remove);
+                await _storageHelper.DeletePlayerAsync(playerId);
+
+                await GetPlayersAsync();
+
                 return true;
             }
 

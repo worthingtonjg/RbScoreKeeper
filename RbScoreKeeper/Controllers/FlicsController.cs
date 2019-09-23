@@ -32,9 +32,9 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpDelete("{flicId}")]
-        public void DeleteFlic(Guid flicId)
+        public async Task DeleteFlic(Guid flicId)
         {
-            _appState.DeleteFlic(flicId);
+            await _appState.DeleteFlicAsync(flicId);
         }
     }
 }

@@ -30,9 +30,9 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpDelete("{playerId}")]
-        public void DeletePlayer(Guid playerId)
+        public async Task DeletePlayer(Guid playerId)
         {
-            _appState.DeletePlayer(playerId);
+            await _appState.DeletePlayerAsync(playerId);
         }
 
     }
