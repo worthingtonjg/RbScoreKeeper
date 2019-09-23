@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RbScoreKeeper.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +16,12 @@ namespace RbScoreKeeper.Models
         {
             FlicId = Guid.NewGuid();
             Name = name;
+        }
+
+        public Flic(FlicEntity flic)
+        {
+            FlicId = new Guid(flic.RowKey);
+            Name = flic.Name;
         }
     }
 }

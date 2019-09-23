@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RbScoreKeeper.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,6 +47,7 @@ namespace RbScoreKeeper.Models
 
     public class AppState : IAppState
     {
+        private IStorageHelper _storageHelper;
         private List<Flic> _flics { get; set; }
         private List<Player> _players { get; set; }
         private List<FlicButtonBinding> _bindings { get; set; }
@@ -54,8 +56,9 @@ namespace RbScoreKeeper.Models
         private List<Match> _matchesHistory { get; set; }
         private List<Game> _gamesHistory { get; set; }
 
-        public AppState()
+        public AppState(IStorageHelper storageHelper)
         {
+            _storageHelper = storageHelper;
             _flics = new List<Flic>();
             _players = new List<Player>();
             _bindings = new List<FlicButtonBinding>();
@@ -67,7 +70,7 @@ namespace RbScoreKeeper.Models
             AddDefaultData();
         }
 
-        private void AddDefaultData()
+        private async void AddDefaultData()
         {
             var flic1 = new Flic("001");
             var flic2 = new Flic("002");
@@ -77,17 +80,11 @@ namespace RbScoreKeeper.Models
             _flics.Add(flic2);
             _flics.Add(flic3);
 
-            var jon = new Player("Jon");
-            var alan = new Player("Alan");
-            var tony = new Player("Tony");
+            var flics = await _storageHelper.GetFlics();
+            _flics = flics.Select(f => new Flic(f)).ToList();
 
-            _players.Add(jon);
-            _players.Add(tony);
-            _players.Add(alan);
-            _players.Add(new Player("Jared"));
-            _players.Add(new Player("Scott"));
-            _players.Add(new Player("Randy"));
-            _players.Add(new Player("Nahinu"));
+            var players = await _storageHelper.GetPlayers();
+            _players = players.Select(p => new Player(p)).ToList();
         }
 
         #region Flics

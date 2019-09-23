@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RbScoreKeeper.Hubs;
 using RbScoreKeeper.Models;
+using RbScoreKeeper.Services;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace RbScoreKeeper
@@ -34,6 +35,11 @@ namespace RbScoreKeeper
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+
+            var accountName = Configuration["StorageAccountName"];
+            var accountKey = Configuration["StorageAccountKey"];
+
+            services.AddSingleton<IStorageHelper>(new StorageHelper(accountName, accountKey));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
