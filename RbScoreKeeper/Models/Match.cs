@@ -21,6 +21,8 @@ namespace RbScoreKeeper.Models
 
         public List<Game> Games { get; set; }
 
+        public Guid? CurrentPlayer { get; set; }
+
         public Game CurrentGame
         {
             get

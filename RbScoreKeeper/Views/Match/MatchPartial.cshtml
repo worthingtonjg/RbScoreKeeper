@@ -16,7 +16,14 @@ else
         <tr>
             @foreach (var player in Model.Players)
             {
-                <td style="text-align:center" width="200">
+                @if (player.PlayerId == Model.CurrentPlayer)
+                {
+                    @:<td style="text-align:center; background-color: lightgreen" width="200">
+                }
+                else
+                {
+                    @:<td style="text-align:center" width="200">
+                }
                     <p><b>@player.Name</b></p>
                     @foreach (var score in Model.CurrentGame.Scores)
                     {
@@ -25,9 +32,9 @@ else
                             <p>@score.Score</p>
                         }
                     }
-                </td>
-            }
-        </tr>
+                @:</td>
+                }
+            </tr>
     </table>
 }
 

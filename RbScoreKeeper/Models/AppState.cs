@@ -56,7 +56,6 @@ namespace RbScoreKeeper.Models
 
         private int _winningScore { get; set; } = 15;
         private bool _oneButtonMode { get; set; } = false;
-        private int _currentPlayer = 1;
 
         private List<Match> _matchesHistory { get; set; }
         private List<Game> _gamesHistory { get; set; }
@@ -227,10 +226,9 @@ namespace RbScoreKeeper.Models
                 {
                     var players = _activeMatch.Players.Select(p => p.PlayerId).ToList();
 
-                    if (_oneButtonMode)
+                    if (_oneButtonMode && _activeMatch.CurrentPlayer != null)
                     {
-                        var player = _activeMatch.Players[_currentPlayer];
-                        result = _activeMatch.CurrentGame.Scores.FirstOrDefault(s => s.PlayerId == player.PlayerId);
+                        result = _activeMatch.CurrentGame.Scores.FirstOrDefault(s => s.PlayerId == _activeMatch.CurrentPlayer);
                     }
                     else
                     {
@@ -285,6 +283,7 @@ namespace RbScoreKeeper.Models
                 StartTime = DateTime.Now,
                 Players = players,
                 Games = new List<Game>() { new Game(players) },
+                CurrentPlayer = oneButtonMode ? players[0].PlayerId : default(Guid?),
             };
 
             _activeGame = _activeMatch.CurrentGame;
@@ -364,14 +363,18 @@ namespace RbScoreKeeper.Models
 
         private void SwitchPlayers()
         {
-            if (_currentPlayer == _activeMatch.Players.Count)
+            var player = _activeMatch.Players.FirstOrDefault(p => p.PlayerId == _activeMatch.CurrentPlayer);
+            int index = _activeMatch.Players.IndexOf(player);
+            if (index == _activeMatch.Players.Count - 1)
             {
-                _currentPlayer = 1;
+                index = 0;
             }
             else
             {
-                ++_currentPlayer;
+                ++index;
             }
+
+            _activeMatch.CurrentPlayer = _activeMatch.Players[index].PlayerId;
         }
 
         #endregion
