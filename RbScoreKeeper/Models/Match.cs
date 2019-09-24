@@ -9,6 +9,10 @@ namespace RbScoreKeeper.Models
     {
         public Guid MatchId { get; set; }
 
+        public bool SingleButtonMode { get; set; }
+
+        public int WinningScore { get; set; }
+
         public List<Player> Players { get; set; }
 
         public DateTime StartTime { get; set; }

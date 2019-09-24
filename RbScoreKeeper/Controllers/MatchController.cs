@@ -39,9 +39,9 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpPost("create")]
-        public async void CreateMatch(List<Guid> playerIds)
+        public async void CreateMatch(List<Guid> playerIds, int winningScore, bool oneButtonMode)
         {
-            _appState.CreateMatch(playerIds);
+            _appState.CreateMatch(playerIds, winningScore, oneButtonMode);
             await _hubContext.Clients.All.SendAsync("Refresh");
         }
 

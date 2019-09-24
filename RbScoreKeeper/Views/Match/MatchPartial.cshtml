@@ -10,13 +10,14 @@ else
     <div>
         <h2>Game #: @Model.Games.Count</h2>
     </div>
+    <br /><br />
 
-    <table class="table" align="center" style="font-size:25px;" width="100%">
+    <table align="center" style="font-size:42px;" border="1">
         <tr>
             @foreach (var player in Model.Players)
             {
-                <td style="text-align:center;">
-                    <p>@player.Name</p>
+                <td style="text-align:center" width="200">
+                    <p><b>@player.Name</b></p>
                     @foreach (var score in Model.CurrentGame.Scores)
                     {
                         @if (score.PlayerId == player.PlayerId)

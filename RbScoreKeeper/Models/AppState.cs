@@ -28,11 +28,11 @@ namespace RbScoreKeeper.Models
 
         List<Game> GetGameHistory();
 
-        void CreateMatch(List<Guid> playerIds);
+        void CreateMatch(List<Guid> playerIds, int winningScore, bool oneButtonMode);
 
         void EndMatch();
 
-        void NextGame(string buttonName);
+        void HandleLongPress(string buttonName);
 
         void NextGame();
 
@@ -55,6 +55,8 @@ namespace RbScoreKeeper.Models
         private Game _activeGame { get; set; }
 
         private int _winningScore { get; set; } = 15;
+        private bool _oneButtonMode { get; set; } = false;
+        private int _currentPlayer = 1;
 
         private List<Match> _matchesHistory { get; set; }
         private List<Game> _gamesHistory { get; set; }
@@ -224,9 +226,18 @@ namespace RbScoreKeeper.Models
                 if (binding != null)
                 {
                     var players = _activeMatch.Players.Select(p => p.PlayerId).ToList();
-                    if (players.Contains(binding.PlayerId))
+
+                    if (_oneButtonMode)
                     {
-                        result = _activeMatch.CurrentGame.Scores.FirstOrDefault(s => s.PlayerId == binding.PlayerId);
+                        var player = _activeMatch.Players[_currentPlayer];
+                        result = _activeMatch.CurrentGame.Scores.FirstOrDefault(s => s.PlayerId == player.PlayerId);
+                    }
+                    else
+                    {
+                        if (players.Contains(binding.PlayerId))
+                        {
+                            result = _activeMatch.CurrentGame.Scores.FirstOrDefault(s => s.PlayerId == binding.PlayerId);
+                        }
                     }
                 }
             }
@@ -252,9 +263,11 @@ namespace RbScoreKeeper.Models
             return _gamesHistory;
         }
 
-        public void CreateMatch(List<Guid> playerIds)
+        public void CreateMatch(List<Guid> playerIds, int winningScore, bool oneButtonMode)
         {
             var players = _players.Where(p => playerIds.Contains(p.PlayerId)).ToList();
+            _winningScore = winningScore;
+            _oneButtonMode = oneButtonMode;
 
             // Loop through the players and bind them to a flic
             int index = 0;
@@ -323,18 +336,41 @@ namespace RbScoreKeeper.Models
             }
         }
 
-        public void NextGame(string buttonName)
+        public void HandleLongPress(string buttonName)
         {
+            if (_activeMatch == null) return;
+
             var flic = _flics.FirstOrDefault(f => f.Name == buttonName);
             if (flic == null) return;
             
             var binding = _bindings.FirstOrDefault(b => b.FlicId == flic.FlicId);
             if (binding == null) return;
 
+            bool hasWinner =_activeMatch.CurrentGame.Scores.Count(s => s.Score == _winningScore) == 1;
+
             var players = _activeMatch.Players.Select(p => p.PlayerId).ToList();
             if (players.Contains(binding.PlayerId))
             {
-                NextGame();
+                if (hasWinner)
+                {
+                    NextGame();
+                }
+                else if (_oneButtonMode)
+                {
+                    SwitchPlayers();
+                }
+            }
+        }
+
+        private void SwitchPlayers()
+        {
+            if (_currentPlayer == _activeMatch.Players.Count)
+            {
+                _currentPlayer = 1;
+            }
+            else
+            {
+                ++_currentPlayer;
             }
         }
 
