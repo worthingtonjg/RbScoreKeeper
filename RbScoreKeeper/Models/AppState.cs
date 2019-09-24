@@ -8,6 +8,8 @@ namespace RbScoreKeeper.Models
 {
     public interface IAppState
     {
+        Task<List<Stats>> GetStatsAsync();
+
         Task<List<Player>> GetPlayersAsync();
 
         Task AddPlayerAsync(string name);
@@ -23,10 +25,6 @@ namespace RbScoreKeeper.Models
         List<FlicButtonBinding> GetButtonBindings();
 
         Match GetActiveMatch();
-
-        List<Match> GetMatchHistory();
-
-        List<Game> GetGameHistory();
 
         void CreateMatch(List<Guid> playerIds, int winningScore, bool oneButtonMode);
 
@@ -57,17 +55,12 @@ namespace RbScoreKeeper.Models
         private int _winningScore { get; set; } = 15;
         private bool _oneButtonMode { get; set; } = false;
 
-        private List<Match> _matchesHistory { get; set; }
-        private List<Game> _gamesHistory { get; set; }
-
         public AppState(IStorageHelper storageHelper)
         {
             _storageHelper = storageHelper;
             _flics = new List<Flic>();
             _players = new List<Player>();
             _bindings = new List<FlicButtonBinding>();
-            _matchesHistory = new List<Match>();
-            _gamesHistory = new List<Game>();
             _activeMatch = null;
             _activeGame = null;
 
@@ -78,6 +71,17 @@ namespace RbScoreKeeper.Models
         {
             await GetFlicsAsync();
             await GetPlayersAsync();
+        }
+
+        public async Task<List<Stats>> GetStatsAsync()
+        {
+            var result = new List<Stats>();
+
+            var stats = await _storageHelper.GetStatsAsync();
+
+            result = stats.Select(s => new Stats(s, _players)).ToList();
+
+            return result;
         }
 
         #region Flics
@@ -201,7 +205,10 @@ namespace RbScoreKeeper.Models
             var score = GetPlayerScoreFromBinding(buttonName);
             if (score != null)
             {
-                ++score.Score;
+                if (score.Score < _winningScore)
+                {
+                    ++score.Score;
+                }
             }
         }
 
@@ -210,7 +217,10 @@ namespace RbScoreKeeper.Models
             var score = GetPlayerScoreFromBinding(buttonName);
             if (score != null)
             {
-                --score.Score;
+                if (score.Score > 0)
+                {
+                    --score.Score;
+                }
             }
         }
 
@@ -249,16 +259,6 @@ namespace RbScoreKeeper.Models
         public Match GetActiveMatch()
         {
             return _activeMatch;
-        }
-
-        public List<Match> GetMatchHistory()
-        {
-            return _matchesHistory;
-        }
-
-        public List<Game> GetGameHistory()
-        {
-            return _gamesHistory;
         }
 
         public void CreateMatch(List<Guid> playerIds, int winningScore, bool oneButtonMode)
@@ -303,10 +303,9 @@ namespace RbScoreKeeper.Models
 
                 if (_activeMatch.CurrentGame.Scores.Count(s => s.Score == _winningScore) == 1)
                 {
-                    _gamesHistory.Add(_activeMatch.CurrentGame);
+                    RecordStats();
                 }
 
-                _matchesHistory.Add(_activeMatch);
                 _activeMatch = null;
             }
         }
@@ -329,7 +328,7 @@ namespace RbScoreKeeper.Models
                 if (_activeMatch.CurrentGame.Scores.Count(s => s.Score == _winningScore) == 1)
                 {
                     _activeMatch.CurrentGame.EndTime = DateTime.Now;
-                    _gamesHistory.Add(_activeMatch.CurrentGame);
+                    RecordStats();
                     _activeMatch.Games.Add(new Game(_activeMatch.Players));
                 }
             }
@@ -361,6 +360,7 @@ namespace RbScoreKeeper.Models
             }
         }
 
+
         private void SwitchPlayers()
         {
             var player = _activeMatch.Players.FirstOrDefault(p => p.PlayerId == _activeMatch.CurrentPlayer);
@@ -375,6 +375,20 @@ namespace RbScoreKeeper.Models
             }
 
             _activeMatch.CurrentPlayer = _activeMatch.Players[index].PlayerId;
+        }
+
+        private void RecordStats()
+        {
+            if(_activeMatch == null || _activeMatch.CurrentGame == null)
+            {
+                return;
+            }
+
+            var playerIds = _activeMatch.Players.Select(p => p.PlayerId.ToString()).ToList();
+            var winningScore = _activeMatch.CurrentGame.Scores.Max(s => s.Score);
+            var winner = _activeMatch.CurrentGame.Scores.FirstOrDefault(s => s.Score == winningScore);
+
+            _storageHelper.AddUpdateStatsAsync(playerIds, winner.PlayerId.ToString());
         }
 
         #endregion

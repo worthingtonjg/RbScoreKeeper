@@ -69,11 +69,5 @@ namespace RbScoreKeeper.Controllers
             _appState.EndMatch();
             await _hubContext.Clients.All.SendAsync("Refresh");
         }
-
-        [HttpPost("history")]
-        public void History()
-        {
-            _appState.GetMatchHistory();
-        }
     }
 }

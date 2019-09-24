@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Stats";
+}
+
+<div class="text-center">
+    <div id="scoresTable"></div>
+</div>
+
+<script src="~/lib/signalr/dist/browser/signalr.js"></script>
+
+<script>
+    "use strict";
+
+    var refresh = function () {
+        fetch('/api/stats/partial')
+            .then(function (response) {
+                return response.text();
+            })
+            .then(function (data) {
+                console.log(data);
+                 document.getElementById("scoresTable").innerHTML = data;
+            });
+    }
+
+    refresh();
+</script>

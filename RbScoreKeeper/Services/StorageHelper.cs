@@ -16,6 +16,8 @@ namespace RbScoreKeeper.Services
         Task<List<FlicEntity>> GetFlicsAsync();
         Task<FlicEntity> AddFlicAsync(string name);
         Task<bool> DeleteFlicAsync(Guid flicId);
+        Task<List<StatsEntity>> GetStatsAsync();
+        Task AddUpdateStatsAsync(List<string> playerIds, string winnerId);
     }
 
     public class StorageHelper : IStorageHelper
@@ -26,6 +28,7 @@ namespace RbScoreKeeper.Services
         CloudTableClient tableClient;
         CloudTable playerTable;
         CloudTable flicTable;
+        CloudTable statsTable;
 
         public StorageHelper(string accountName, string accountKey)
         {
@@ -37,16 +40,15 @@ namespace RbScoreKeeper.Services
 
             playerTable = tableClient.GetTableReference("Player");
             flicTable = tableClient.GetTableReference("Flic");
+            statsTable = tableClient.GetTableReference("Stats");
         }
 
         public async Task<List<PlayerEntity>> GetPlayersAsync()
         {
             var result = new List<PlayerEntity>();
 
-            // Construct the query operation for all customer entities where PartitionKey="Smith".
             TableQuery<PlayerEntity> query = new TableQuery<PlayerEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "worthingtonjg"));
 
-            // Print the fields for each customer.
             TableContinuationToken token = null;
             do
             {
@@ -94,10 +96,8 @@ namespace RbScoreKeeper.Services
         {
             var result = new List<FlicEntity>();
 
-            // Construct the query operation for all customer entities where PartitionKey="Smith".
             TableQuery<FlicEntity> query = new TableQuery<FlicEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "worthingtonjg"));
 
-            // Print the fields for each customer.
             TableContinuationToken token = null;
             do
             {
@@ -139,6 +139,140 @@ namespace RbScoreKeeper.Services
             await flicTable.ExecuteAsync(delete);
 
             return true;
+        }
+
+        public async Task<List<StatsEntity>> GetStatsAsync()
+        {
+            var result = new List<StatsEntity>();
+
+            TableQuery<StatsEntity> query = new TableQuery<StatsEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, "worthingtonjg"));
+
+            TableContinuationToken token = null;
+            do
+            {
+                TableQuerySegment<StatsEntity> resultSegment = await statsTable.ExecuteQuerySegmentedAsync(query, token);
+                token = resultSegment.ContinuationToken;
+
+                result = resultSegment.Results;
+
+            } while (token != null);
+
+            return result.OrderBy(f => f.Name).ToList();
+        }
+
+        public async Task AddUpdateStatsAsync(List<string> playerIds, string winnerId)
+        {
+            if (playerIds.Count < 1)
+            {
+                throw new Exception("Must have at least 1 player");
+            }
+
+            if (playerIds.Count > 3)
+            {
+                throw new Exception("Cannot have more than 3 players");
+            }
+
+            if (!playerIds.Contains(winnerId))
+            {
+                throw new Exception("One of the players must be the winner");
+            }
+
+            // Get all the stats
+            var stats = await GetStatsAsync();
+
+            // Find an stat that matches the list of players
+            StatsEntity match = null;
+            foreach(var stat in stats)
+            {
+                if(stat.PlayerId1 != null && !playerIds.Contains(stat.PlayerId1))
+                {
+                    continue;
+                }
+
+                if (stat.PlayerId2 != null && !playerIds.Contains(stat.PlayerId2))
+                {
+                    continue;
+                }
+
+                if (stat.PlayerId3 != null && !playerIds.Contains(stat.PlayerId3))
+                {
+                    continue;
+                }
+
+                match = stat;
+                break;
+            }
+
+            if (match == null)
+            {
+                // No match was found
+                var players = await GetPlayersAsync();
+
+                var playerGroup = players.Where(p => playerIds.Contains(p.RowKey.ToString())).OrderBy(p => p.Name).ToList();
+
+                // Create a new stat
+                match = new StatsEntity
+                {
+                    PartitionKey = partitionKey,
+                    RowKey = Guid.NewGuid().ToString(),
+                    Name = string.Join(" vs ", playerGroup.Select(p => p.Name).ToList()),
+                    Wins1 = 0,
+                    Wins2 = 0,
+                    Wins3 = 0,
+                };
+
+                // Update the player ids and the winner
+                if (playerIds.Count >= 1)
+                {
+                    match.PlayerId1 = playerIds[0];
+                    if(winnerId == match.PlayerId1)
+                    {
+                        ++match.Wins1;
+                    }
+                }
+
+                if (playerIds.Count >= 2)
+                {
+                    match.PlayerId2 = playerIds[1];
+                    if (winnerId == match.PlayerId2)
+                    {
+                        ++match.Wins2;
+                    }
+                }
+
+                if (playerIds.Count >= 3)
+                {
+                    match.PlayerId3 = playerIds[2];
+                    if (winnerId == match.PlayerId3)
+                    {
+                        ++match.Wins3;
+                    }
+                }
+
+                // Insert new stat
+                TableOperation insert = TableOperation.Insert(match);
+                await statsTable.ExecuteAsync(insert);
+            }
+            else
+            {
+                // Increment the stat for the player that one
+                if(winnerId == match.PlayerId1)
+                {
+                    ++match.Wins1;
+                }
+                if (winnerId == match.PlayerId2)
+                {
+                    ++match.Wins2;
+                }
+                if (winnerId == match.PlayerId3)
+                {
+                    ++match.Wins3;
+                }
+
+                // Update stat
+                TableOperation update = TableOperation.Replace(match);
+                await statsTable.ExecuteAsync(update);
+            }
         }
     }
 }

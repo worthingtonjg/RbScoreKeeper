@@ -15,12 +15,24 @@ namespace RbScoreKeeper.Controllers
             return View();
         }
 
-
         [HttpGet("mobile")]
-        public IActionResult IndexNoLayout()
+        public IActionResult IndexMobile()
         {
             return View("Mobile");
         }
+
+        [HttpGet("stats")]
+        public IActionResult Stats()
+        {
+            return View("Stats");
+        }
+
+        [HttpGet("mobile/stats")]
+        public IActionResult StatsMobile()
+        {
+            return View("MobileStats");
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
