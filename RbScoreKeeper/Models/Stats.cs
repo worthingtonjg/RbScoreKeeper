@@ -31,6 +31,8 @@ namespace RbScoreKeeper.Models
             {
                 PlayerStats.Add(new Stat(stats.PlayerId3, stats.Wins3, numGames, players));
             }
+
+            PlayerStats = PlayerStats.OrderBy(p => p.Name).ToList();
         }
 
     }

@@ -4,7 +4,7 @@ using RbScoreKeeper.Hubs;
 using RbScoreKeeper.Models;
 using System;
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 
 namespace RbScoreKeeper.Controllers
 {
@@ -28,11 +28,21 @@ namespace RbScoreKeeper.Controllers
         }
 
         [HttpGet("partial")]
-        public IActionResult GetMatchPartial()
+        public async Task<IActionResult> GetMatchPartial()
         {
             Match match = _appState.GetActiveMatch();
 
-            return PartialView("MatchPartial", match);
+            if (match != null)
+            {
+                return PartialView("MatchPartial", match);
+            }
+            else
+            {
+                List<Stats> stats = await _appState.GetStatsAsync();
+                ViewData["showMessage"] = true;
+                return PartialView("StatsPartial", stats);
+            }
+
         }
 
         [HttpPost("create")]

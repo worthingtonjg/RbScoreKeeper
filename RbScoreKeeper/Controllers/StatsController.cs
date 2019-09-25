@@ -29,7 +29,7 @@ namespace RbScoreKeeper.Controllers
         {
             var stats = await _appState.GetStatsAsync();
 
-            return PartialView("StatsPartial", stats);
+            return PartialView("~/Views/Match/StatsPartial.cshtml", stats);
         }
     }
 }

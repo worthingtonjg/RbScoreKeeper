@@ -1,40 +1,31 @@
-﻿@model Match;
-@if (Model == null)
-{
-    <div>
-        Create a new match to start playing.
-    </div>
-}
-else
-{
-    <div>
-        <h2>Game #: @Model.Games.Count</h2>
-    </div>
-    <br /><br />
+﻿<div>
+    <h2>Game #: @Model.Games.Count</h2>
+</div>
+<br /><br />
 
-    <table align="center" border="1">
-        <tr>
-            @foreach (var player in Model.Players)
+<table align="center" border="1">
+    <tr>
+        @foreach (var player in Model.Players)
+        {
+            @if (player.PlayerId == Model.CurrentPlayer)
             {
-                @if (player.PlayerId == Model.CurrentPlayer)
+                @:<td style="text-align:center; background-color: lightgreen" width="200">
+            }
+            else
+            {
+                @:<td style="text-align:center" width="200">
+            }
+                <p><b>@player.Name</b></p>
+                @foreach (var score in Model.CurrentGame.Scores)
                 {
-                    @:<td style="text-align:center; background-color: lightgreen" width="200">
-                }
-                else
-                {
-                    @:<td style="text-align:center" width="200">
-                }
-                    <p><b>@player.Name</b></p>
-                    @foreach (var score in Model.CurrentGame.Scores)
+                    @if (score.PlayerId == player.PlayerId)
                     {
-                        @if (score.PlayerId == player.PlayerId)
-                        {
-                            <p>@score.Score</p>
-                        }
+                        <p>@score.Score</p>
                     }
-                @:</td>
                 }
-            </tr>
-    </table>
-}
+            @:</td>
+            }
+        </tr>
+</table>
+
 

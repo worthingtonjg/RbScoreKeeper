@@ -157,7 +157,7 @@ namespace RbScoreKeeper.Services
 
             } while (token != null);
 
-            return result.OrderBy(f => f.Timestamp).ToList();
+            return result.OrderByDescending(f => f.Timestamp).ToList();
         }
 
         public async Task AddUpdateStatsAsync(List<string> playerIds, string winnerId)

@@ -1,0 +1,50 @@
+﻿@model List<Stats>;
+@{ var showMessage = ViewData["showMessage"] as bool?; }
+@if (showMessage.HasValue && showMessage.Value)
+{
+    <div>
+        Create a new match to start playing...
+        <br /><br />
+    </div>
+}
+
+<style>
+    .stats-div:nth-child(odd) {
+        background: #f6f6f6;
+    }
+</style>
+@foreach (var stat in Model)
+{
+    <div class="stats-div">
+        <h2>@stat.Name</h2>
+        <table align="center" class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            @foreach (var playerStat in stat.PlayerStats)
+            {
+                <tr>
+                    <td>
+                        @playerStat.Name
+                    </td>
+                    <td>
+                        @playerStat.Wins
+                    </td>
+                    <td>
+                        @playerStat.Losses
+                    </td>
+                    <td>
+                        @playerStat.WinPercentage %
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+
+
